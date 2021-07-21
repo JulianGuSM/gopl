@@ -1,0 +1,64 @@
+package main
+
+import (
+	"fmt"
+	"sync"
+	"time"
+)
+
+func produce(ch chan int) {
+	for i := 0; i < 1000; i++ {
+		ch <- i
+	}
+}
+func consume(id int, ch chan int, done chan bool) {
+	for {
+		select {
+		case _, ok := <-ch:
+			if ok {
+				//fmt.Printf("id: %v, recv: %d\n", id, value)
+			} else {
+				//fmt.Printf("id: %d, closed\n", id)
+				break
+			}
+			//fmt.Println("value", value)
+			done <- true
+		}
+	}
+}
+func main() {
+
+	concurrencyCount := 10
+
+	start := time.Now()
+	dataChan := make(chan int)
+	doneChan := make(chan bool)
+	for i := 1; i <= concurrencyCount; i++ {
+		go consume(i, dataChan, doneChan)
+	}
+	wg := sync.WaitGroup{}
+	wg.Add(1)
+	cnt := 0
+	go func() {
+		for {
+			select {
+			case _, ok := <-doneChan:
+				if ok {
+					//fmt.Printf("recv: %v\n", value)
+				} else {
+					//fmt.Printf("closed\n")
+					break
+				}
+				cnt++
+				if cnt == 1000 {
+					wg.Done()
+				}
+				//fmt.Println("done:", value)
+			}
+		}
+	}()
+	produce(dataChan)
+
+	fmt.Println("duration", time.Now().Sub(start))
+	wg.Wait()
+}
