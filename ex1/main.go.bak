@@ -1,0 +1,39 @@
+package main
+
+import (
+	"fmt"
+	"strconv"
+	"sync"
+	"time"
+)
+
+type Customer struct {
+	ID string
+}
+
+func fakeRequest(id string) {
+	fmt.Println("id", id)
+	time.Sleep(time.Millisecond)
+}
+
+func main() {
+	count := 1000
+	customers := make([]Customer, count)
+	for i := 0; i < count; i++ {
+		customers[i].ID = strconv.Itoa(i)
+	}
+	start := time.Now()
+	var wg sync.WaitGroup
+	var limit = make(chan struct{}, 10)
+	for _, customer := range customers {
+		wg.Add(1)
+		limit <- struct{}{}
+		go func(c Customer) {
+			defer wg.Done()
+			fakeRequest(c.ID)
+			<-limit
+		}(customer)
+	}
+	wg.Wait()
+	fmt.Println("duration", time.Now().Sub(start))
+}

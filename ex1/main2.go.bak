@@ -1,0 +1,60 @@
+package main
+
+import (
+	"fmt"
+	"strconv"
+	"time"
+)
+
+/**
+ * @Author: sm.gu
+ * @Author: sm.gu@aftership.com
+ * @Date: 2021/7/20 3:56 下午
+ * @Desc:
+ */
+
+type Customer struct {
+	ID string
+}
+
+func fakeRequest(id string, channel chan string) {
+	fmt.Println("id:", id)
+	channel <- id
+	time.Sleep(time.Millisecond)
+}
+
+func main() {
+	count := 1000
+	customers := make([]Customer, count)
+
+	for i := 0; i < count; i++ {
+		customers[i] = Customer{strconv.Itoa(i)}
+	}
+
+	start1 := time.Now()
+
+	ch := make(chan string, 10)
+
+	for i := 0; i < count/10; i += 1 {
+		tmp0 := i
+
+		for j := 0; j < 10; j++ {
+			tmp := j
+			go fakeRequest(customers[tmp0*10+tmp].ID, ch)
+
+		}
+
+		for i := 0; i < 10; i++ {
+			<-ch
+		}
+	}
+
+	fmt.Printf("cost time: %v\n", time.Since(start1))
+	//start2 := time.Now()
+	//for i := 0; i < count; i += 10 {
+	//	for j := 0; j < 9; j++ {
+	//		fakeRequest(string(i + j))
+	//	}
+	//}
+	//fmt.Printf("cost time: %v", time.Since(start2))
+}
