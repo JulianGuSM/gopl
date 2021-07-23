@@ -1,0 +1,9 @@
+{
+  "level": "info",
+  "ts": 1626946891.931691,
+  "caller": "Zap_Tutorial/hellozap.go:22",
+  "msg": "Failed to fetch URL.",
+  "url": "https://example.com",
+  "attempt": 3,
+  "backoff": 1
+}
