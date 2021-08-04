@@ -76,8 +76,11 @@ func main() {
 	r.GET("/Album's", getAlbums2)
 	r.POST("/albums", postAlbums)
 	r.GET("/albums/:id", getAlbumById)
+	r.GET("/test", func(context *gin.Context) {
+		context.Redirect(http.StatusMovedPermanently, "https://www.baidu.com")
+	})
 
-	err := r.Run(":8080")
+	err := r.Run(":9080")
 	if err != nil {
 		logger.Error("server start failed!",
 			zap.Any("error_msg", err),
